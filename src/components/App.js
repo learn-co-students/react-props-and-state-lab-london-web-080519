@@ -1,21 +1,71 @@
-import React from 'react'
+import React from "react";
 
-import Filters from './Filters'
-import PetBrowser from './PetBrowser'
+import Filters from "./Filters";
+import PetBrowser from "./PetBrowser";
 
 class App extends React.Component {
   constructor() {
-    super()
+    super();
 
     this.state = {
       pets: [],
       filters: {
-        type: 'all'
+        type: "all"
       }
-    }
+    };
   }
 
+  onChangeType = selection => {
+    this.setState({ filters: { type: selection.value } });
+  };
+
+  onFindPetsClick = () => {
+    // console.log(this.state.filters.type)
+    if (this.state.filters.type === "all") {
+      return fetch("/api/pets")
+        .then(response => response.json())
+        .then(response => {
+          this.setState({ pets: response });
+        });
+    } else {
+      let query = `/api/pets?type=` + this.state.filters.type
+      console.log(query)
+      // console.log(this.state.filters.type)
+    return fetch(query)
+      .then(response => response.json())
+      .then(response => {
+        this.setState({ pets: response });
+      });
+    }
+  };
+
+  filterPets = () => {
+    return this.state.pets.filter(pet => {
+      return (
+        this.state.filters.type === "all" ||
+        pet.type === this.state.filters.type
+      );
+    });
+  };
+
+  onAdoptPet = pet_id => {
+    console.log(
+      `${this.state.pets.find(pet => pet.id === pet_id).name} adopted!`
+    );
+    this.setState({
+      pets: this.state.pets.map(pet => {
+        if (pet.id === pet_id) {
+          pet.isAdopted = true;
+          return pet;
+        } else {
+          return pet;
+        }
+      })
+    });
+  };
+
   render() {
+    let filteredPets = this.filterPets();
     return (
       <div className="ui container">
         <header>
@@ -24,16 +74,19 @@ class App extends React.Component {
         <div className="ui container">
           <div className="ui grid">
             <div className="four wide column">
-              <Filters />
+              <Filters
+                onChangeType={this.onChangeType}
+                onFindPetsClick={this.onFindPetsClick}
+              />
             </div>
             <div className="twelve wide column">
-              <PetBrowser />
+              <PetBrowser pets={filteredPets} onAdoptPet={this.onAdoptPet} />
             </div>
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 
-export default App
+export default App;

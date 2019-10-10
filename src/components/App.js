@@ -33,14 +33,29 @@ class App extends React.Component {
 
   onFindPetsClick = () => {
     if (this.state.filters.type === "all") {
-      fetch(`${URL}`).then(response=> response.json()).then(pet=> this.updatePetsState(pet))
+      return fetch(`${URL}`).then(response=> response.json()).then(pet=> this.updatePetsState(pet))
     } else {
-      fetch(`${URL}?type=${this.state.filters.type}`).then(response=> response.json()).then(pet=> this.updatePetsState(pet))
+      return fetch(`${URL}?type=${this.state.filters.type}`).then(response=> response.json()).then(pet=> this.updatePetsState(pet))
     }
   }
 
   onAdoptPet = (pet) => {
-    console.log(pet)
+    let foundPet = this.state.pets.find(p => p.id === pet)
+    let copyPets = this.state.pets.filter(pet=> pet.id !== foundPet)
+    foundPet.isAdopted = true
+    
+    this.setState({
+      pets: copyPets
+    })
+    
+    // return fetch(`${URL}/${pet}`, {
+    //   method: "PATCH",
+    //   headers: {
+    //     "Content-type": "application/json",
+		//     "Accept": "application/json"
+    //   }, body: JSON.stringify({isAdopted: true})
+    // }).then(response=>response.json())
+
   }
 
   render() {
